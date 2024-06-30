@@ -39,18 +39,21 @@ def show_album_tracks(album):
         logger.info('%s. %s', i + 1, track['name'])
         track_details = sp.track(track['uri'])
         track_audio_features = sp.audio_features(track['uri'])
-        track_data = {}
-        track_data['uri'] = track['uri']
-        track_data['name'] = track['name']
-        track_data['album_name'] = track_details['album']['name']
-        track_data['release_date'] = track_details['album']['release_date']
-        track_data['popularity'] = track_details['popularity']
-        track_data['duration_ms'] = track_details['duration_ms']
-        for k, v in track_audio_features[0].items():
-            if k in ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']:
-                track_data[k] = v
-        df = pd.DataFrame.from_dict(track_data, orient='index').transpose()
-        track_df = pd.concat([track_df, df], axis=0)
+        if track_audio_features[0] is not None:
+            track_data = {}
+            track_data['uri'] = track['uri']
+            track_data['name'] = track['name']
+            track_data['album_name'] = track_details['album']['name']
+            track_data['release_date'] = track_details['album']['release_date']
+            track_data['popularity'] = track_details['popularity']
+            track_data['duration_ms'] = track_details['duration_ms']
+            for k, v in track_audio_features[0].items():
+                if k in ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']:
+                    track_data[k] = v
+            df = pd.DataFrame.from_dict(track_data, orient='index').transpose()
+            track_df = pd.concat([track_df, df], axis=0)
+        else:
+            continue
 
     return track_df
 
@@ -83,7 +86,7 @@ def show_artist(artist):
 
 
 sp = authenticate()
-artist = get_artist('ODESZA')
+artist = get_artist('Lorde')
 show_artist(artist)
 discography_df = show_artist_albums(artist)
 discography_df.to_csv('discography.csv', index=False)
